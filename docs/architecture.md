@@ -56,6 +56,17 @@ All foreign key relationships use cascade rules where appropriate to maintain da
 ---
 
 ## 4. API Architecture
+The API architecture follows RESTful design principles and is organized into functional modules. Each module exposes endpoints responsible for a specific domain of the system, ensuring clear separation of concerns.
+
+Authentication APIs handle tenant registration, user login, token validation, and logout operations. These endpoints are publicly accessible where required and protected using JWT authentication once a user is logged in.
+
+Tenant management APIs allow viewing and updating tenant details. Access to these endpoints is restricted based on user roles, with certain operations available only to super admins.
+
+User management APIs enable tenant admins to manage users within their tenant. These endpoints enforce tenant isolation by validating tenant context from the JWT token.
+
+Project and task management APIs handle project lifecycle operations and task tracking. All project and task APIs automatically scope data to the authenticated user’s tenant, preventing cross-tenant access.
+
+All APIs return consistent JSON responses and use proper HTTP status codes. Middleware is used to enforce authentication, authorization, tenant isolation, input validation, and audit logging across all endpoints.
 
 ### Authentication APIs
 - POST /api/auth/register-tenant
