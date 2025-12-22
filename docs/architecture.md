@@ -20,7 +20,16 @@ Docker Compose orchestrates all services, enabling one-command startup of the en
 Diagram Location:
 docs/images/system-architecture.png
 
-(Explain the diagram here)
+The system architecture diagram represents the high-level interaction between the client, frontend application, backend services, and the database.
+
+Users access the system through a web browser, which loads the React-based frontend application. The frontend handles user interactions such as login, registration, project management, and task updates. Based on user actions, the frontend sends HTTP requests to the backend API server.
+
+The backend API server is built using Node.js and Express.js. It exposes RESTful endpoints for authentication, tenant management, user management, project handling, and task operations. JWT-based authentication ensures secure communication, while middleware components enforce role-based access control and tenant isolation.
+
+The backend communicates with the PostgreSQL database to store and retrieve persistent data. All tenant-specific records are associated with a tenant_id to ensure data isolation. Audit logs are stored to track critical system actions.
+
+Docker Compose orchestrates the frontend, backend, and database services. All services communicate within a Docker network using service names, ensuring reliable inter-service communication. This architecture ensures scalability, security, and maintainability of the SaaS platform.
+
 
 ---
 
