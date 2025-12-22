@@ -135,17 +135,42 @@ Containerization is mandatory for this project and ensures reproducibility, easy
 
 ## 3. Security Considerations in Multi-Tenant SaaS
 
+Security is a critical concern in multi-tenant SaaS applications because multiple organizations share the same application and infrastructure. Any security flaw can potentially expose data across tenants. This project implements several security measures to ensure data protection, tenant isolation, and secure access.
+
 ### 3.1 Data Isolation Strategy
-(Write here)
+
+Data isolation is enforced using a tenant-based access model. Every tenant-specific record contains a tenant_id column, and all database queries are filtered using the tenant_id extracted from the authenticated user’s JWT token. Client-provided tenant identifiers are never trusted. This approach ensures that users can only access data belonging to their own tenant.
+
+Super admin users are treated as a special case and have tenant_id set to NULL. They are allowed to access tenant-level data only through explicitly authorized endpoints.
+
+---
 
 ### 3.2 Authentication & Authorization
-(Write here)
+
+Authentication is implemented using JSON Web Tokens (JWT). After successful login, users receive a signed token containing userId, tenantId, and role. Each protected API validates the token before processing the request.
+
+Authorization is enforced using role-based access control (RBAC). Different API endpoints are restricted to specific roles such as super_admin, tenant_admin, or user. Authorization checks are implemented at the API layer to prevent unauthorized actions.
+
+---
 
 ### 3.3 Password Security
-(Write here)
+
+User passwords are never stored in plain text. Passwords are hashed using bcrypt before being saved to the database. Bcrypt applies a salt and multiple hashing rounds, making it resistant to brute-force and rainbow table attacks.
+
+Password strength rules are enforced during user registration to ensure a minimum level of security. During authentication, hashed passwords are compared securely without exposing sensitive information.
+
+---
 
 ### 3.4 API Security Measures
-(Write here)
+
+All APIs follow a consistent error-handling strategy and return appropriate HTTP status codes. Input validation is applied to all incoming requests to prevent malformed data and injection attacks.
+
+Sensitive operations such as tenant registration and user creation are wrapped in database transactions to avoid partial failures. Audit logging is implemented to track important actions such as user creation, deletion, and project updates.
+
+---
 
 ### 3.5 Additional Security Practices
-(Write here)
+
+CORS is configured to allow requests only from the trusted frontend origin. Environment variables are used to store sensitive configuration such as database credentials and JWT secrets. These values are never hard-coded.
+
+The application follows the principle of least privilege, ensuring users only have access to the minimum required resources. Regular security checks and logging help detect unauthorized access attempts and improve system reliability.
