@@ -38,7 +38,20 @@ Docker Compose orchestrates the frontend, backend, and database services. All se
 ERD Location:
 docs/images/database-erd.png
 
-(Explain tables and relationships here)
+The database design follows a relational model optimized for a multi-tenant SaaS architecture. A shared database and shared schema approach is used, where tenant isolation is enforced using a tenant_id column in all tenant-specific tables.
+
+The **tenants** table stores organization-level information such as name, subdomain, status, and subscription plan details. Each tenant acts as a logical boundary for data isolation.
+
+The **users** table stores user accounts and is linked to the tenants table using tenant_id. A composite unique constraint on (tenant_id, email) ensures that the same email address can exist in different tenants but not within the same tenant. Super admin users are stored with tenant_id set to NULL.
+
+The **projects** table stores projects created within a tenant. Each project belongs to exactly one tenant and is created by a user. Foreign key constraints ensure referential integrity, and an index on tenant_id improves query performance.
+
+The **tasks** table stores tasks associated with projects. Each task belongs to both a project and a tenant. This dual linkage ensures that tasks are always scoped correctly within both project and tenant boundaries. Tasks can optionally be assigned to users within the same tenant.
+
+The **audit_logs** table records important system actions such as user creation, project updates, and deletions. It stores references to the tenant and user involved in each action, enabling traceability and security auditing.
+
+All foreign key relationships use cascade rules where appropriate to maintain data consistency. Indexes on tenant_id and commonly queried fields improve performance in a multi-tenant environment.
+
 
 ---
 
