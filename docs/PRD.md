@@ -119,8 +119,9 @@ The End User is a regular team member within a tenant. This role has limited per
 
 ## 3. Non-Functional Requirements
 
-- NFR-001:
-- NFR-002:
-- NFR-003:
-- NFR-004:
-- NFR-005:
+- NFR-001: The system shall ensure that 90% of API requests respond within 200 milliseconds under normal load.
+- NFR-002: The system shall securely hash all user passwords using bcrypt before storage.
+- NFR-003: The system shall support a minimum of 100 concurrent users without performance degradation.
+- NFR-004: The system shall enforce role-based access control on all protected API endpoints.
+- NFR-005: The system shall maintain an uptime target of 99% excluding planned maintenance.
+- NFR-006: The system shall provide a responsive user interface that works on both desktop and mobile devices.
