@@ -90,20 +90,46 @@ Strict tenant isolation is enforced at the application layer using JWT-based aut
 
 ## 2. Technology Stack Justification
 
+Choosing the right technology stack is essential for building a scalable, secure, and maintainable multi-tenant SaaS application. The technologies selected for this project were chosen based on industry adoption, learning value, community support, and suitability for implementing multi-tenancy, authentication, and containerization.
+
 ### 2.1 Backend Technology
-(Write here)
+
+The backend of this application is built using **Node.js with Express.js**. Node.js provides a non-blocking, event-driven runtime that is well suited for building scalable APIs. Express.js is a lightweight and flexible framework that simplifies REST API development while allowing full control over middleware and routing.
+
+Express.js is widely used in production-grade SaaS applications and supports middleware-based architectures, which is ideal for implementing authentication, authorization, tenant isolation, and audit logging. Alternatives such as Django or Spring Boot were considered, but Node.js was chosen due to its simplicity, faster development cycle, and strong ecosystem.
+
+---
 
 ### 2.2 Frontend Technology
-(Write here)
+
+The frontend is built using **React.js**, a popular JavaScript library for building user interfaces. React enables the creation of reusable UI components and supports efficient rendering through its virtual DOM.
+
+React is suitable for this project because it allows easy implementation of role-based UI rendering, protected routes, and dynamic dashboards. It integrates well with REST APIs and supports modern frontend practices. Alternatives like Angular and Vue.js were considered, but React was selected due to its flexibility, widespread industry usage, and strong community support.
+
+---
 
 ### 2.3 Database Technology
-(Write here)
+
+The application uses **PostgreSQL** as the relational database. PostgreSQL is a powerful, open-source database that provides strong support for relational data, constraints, indexing, and transactions.
+
+PostgreSQL is well suited for multi-tenant architectures because it supports advanced indexing, foreign key constraints, and transactional consistency. Features such as composite unique constraints and indexing on tenant_id improve performance and data integrity. Compared to NoSQL databases, PostgreSQL provides better consistency and relational guarantees required for this system.
+
+---
 
 ### 2.4 Authentication Method
-(Write here)
+
+Authentication is implemented using **JSON Web Tokens (JWT)**. JWT provides stateless authentication, making it ideal for scalable distributed systems. Tokens contain user identity, tenant context, and role information, which allows efficient authorization checks without repeated database queries.
+
+JWT was chosen over session-based authentication because it simplifies horizontal scaling and works well with REST APIs. Token expiry ensures security, while bcrypt is used for password hashing to protect user credentials.
+
+---
 
 ### 2.5 Deployment & Containerization
-(Write here)
+
+The application uses **Docker and Docker Compose** for containerization and deployment. Docker ensures consistent environments across development, testing, and evaluation. Docker Compose allows all services—database, backend, and frontend—to be started with a single command.
+
+Containerization is mandatory for this project and ensures reproducibility, easy setup, and automated evaluation. Alternatives such as manual environment setup or VM-based deployment were avoided due to complexity and inconsistency.
+
 
 ---
 
