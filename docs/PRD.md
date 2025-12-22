@@ -74,24 +74,46 @@ The End User is a regular team member within a tenant. This role has limited per
 ## 2. Functional Requirements
 
 ### Authentication Module
-- FR-001:
-- FR-002:
+
+- FR-001: The system shall allow new tenants to register with a unique organization name and subdomain.
+- FR-002: The system shall allow users to log in using email, password, and tenant subdomain.
+- FR-003: The system shall generate JWT tokens upon successful authentication with a 24-hour expiry.
+- FR-004: The system shall allow authenticated users to log out securely.
+
+---
 
 ### Tenant Management Module
-- FR-003:
-- FR-004:
+
+- FR-005: The system shall allow super admins to view a list of all registered tenants.
+- FR-006: The system shall allow super admins to update tenant status and subscription plans.
+- FR-007: The system shall restrict tenant admins from modifying subscription plans.
+
+---
 
 ### User Management Module
-- FR-005:
-- FR-006:
+
+- FR-008: The system shall allow tenant admins to create users within their tenant.
+- FR-009: The system shall enforce subscription-based user limits during user creation.
+- FR-010: The system shall allow tenant admins to update or deactivate users.
+- FR-011: The system shall prevent users from accessing data outside their tenant.
+
+---
 
 ### Project Management Module
-- FR-007:
-- FR-008:
+
+- FR-012: The system shall allow authenticated users to create projects within their tenant.
+- FR-013: The system shall enforce subscription-based project limits.
+- FR-014: The system shall allow users to update or archive projects they own.
+
+---
 
 ### Task Management Module
-- FR-009:
-- FR-010:
+
+- FR-015: The system shall allow users to create tasks within projects.
+- FR-016: The system shall allow users to assign tasks to team members within the same tenant.
+- FR-017: The system shall allow users to update task status and priority.
+- FR-018: The system shall allow users to view tasks assigned to them.
+
 
 ---
 
