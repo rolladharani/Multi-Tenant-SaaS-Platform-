@@ -1,28 +1,17 @@
 const express = require("express");
 const router = express.Router();
 
-const authMiddleware = require("../middleware/auth.middleware");
-const roleMiddleware = require("../middleware/role.middleware");
-const tenantMiddleware = require("../middleware/tenant.middleware");
+const { createUser } = require("../controllers/user.controller");
+const auth = require("../middleware/auth.middleware");
+const role = require("../middleware/role.middleware");
+const tenant = require("../middleware/tenant.middleware");
 
-const userController = require("../controllers/user.controller");
-
-// Create user (Tenant Admin only)
 router.post(
   "/",
-  authMiddleware,
-  roleMiddleware("tenant_admin"),
-  tenantMiddleware,
-  userController.createUser
-);
-
-// List users of tenant
-router.get(
-  "/",
-  authMiddleware,
-  roleMiddleware("tenant_admin"),
-  tenantMiddleware,
-  userController.getUsers
+  auth,
+  tenant,
+  role("tenant_admin"),
+  createUser
 );
 
 module.exports = router;

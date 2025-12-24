@@ -16,6 +16,9 @@ app.use("/api/auth", authRoutes);
 const tenantRoutes = require("./routes/tenant.routes");
 app.use("/api/tenants", tenantRoutes);
 
+const userRoutes = require("./routes/user.routes");
+app.use("/api/users", userRoutes);
+
 
 // Health check (NO force here)
 app.get("/api/health", async (req, res) => {
