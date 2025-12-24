@@ -10,6 +10,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const authRoutes = require("./routes/auth.routes");
+app.use("/api/auth", authRoutes);
+
+
 // Health check (NO force here)
 app.get("/api/health", async (req, res) => {
   try {
