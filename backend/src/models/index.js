@@ -6,6 +6,7 @@ const Tenant = require("./tenant.model")(sequelize, DataTypes);
 const User = require("./user.model")(sequelize, DataTypes);
 const Project = require("./project.model")(sequelize, DataTypes);
 const Task = require("./task.model");
+const AuditLog = require("./auditLog.model");
 
 // Relationships
 Tenant.hasMany(User, { foreignKey: "tenant_id" });
@@ -19,6 +20,12 @@ Task.belongsTo(Project, { foreignKey: "project_id" });
 
 User.hasMany(Task, { foreignKey: "assigned_user_id" });
 Task.belongsTo(User, { foreignKey: "assigned_user_id" });
+
+Tenant.hasMany(AuditLog, { foreignKey: "tenant_id" });
+AuditLog.belongsTo(Tenant, { foreignKey: "tenant_id" });
+
+User.hasMany(AuditLog, { foreignKey: "user_id" });
+AuditLog.belongsTo(User, { foreignKey: "user_id" });
 
 module.exports = {
   sequelize,
