@@ -9,11 +9,14 @@ module.exports = (req, res, next) => {
     }
 
     const token = authHeader.split(" ")[1];
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 🔴 THIS LINE IS CRITICAL
-    req.user = decoded;
+    // ✅ KEEP SAME STRUCTURE AS JWT
+    req.user = {
+      userId: decoded.userId,
+      tenantId: decoded.tenantId,
+      role: decoded.role,
+    };
 
     next();
   } catch (error) {
