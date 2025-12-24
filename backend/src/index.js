@@ -13,6 +13,9 @@ app.use(express.json());
 const authRoutes = require("./routes/auth.routes");
 app.use("/api/auth", authRoutes);
 
+const tenantRoutes = require("./routes/tenant.routes");
+app.use("/api/tenants", tenantRoutes);
+
 
 // Health check (NO force here)
 app.get("/api/health", async (req, res) => {
