@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Health check
+// Health check (NO force here)
 app.get("/api/health", async (req, res) => {
   try {
     await sequelize.authenticate();
@@ -26,16 +26,13 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
-// Server start
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
 
   try {
-    await sequelize.authenticate();
-    console.log("Database connected successfully");
-
+    // 🔥 TEMPORARY force sync ONLY HERE
     await sequelize.sync();
     console.log("Models synced with database");
   } catch (error) {
