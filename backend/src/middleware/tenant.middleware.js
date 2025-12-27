@@ -1,25 +1,21 @@
-const jwt = require("jsonwebtoken");
+const { Tenant } = require("../models");
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-      return res.status(401).json({ message: "No token provided" });
+    if (!req.user || !req.user.tenantId) {
+      return res.status(401).json({ message: "Tenant ID missing in token" });
     }
 
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const tenant = await Tenant.findByPk(req.user.tenantId);
 
-    // ✅ KEEP SAME STRUCTURE AS JWT
-    req.user = {
-      userId: decoded.userId,
-      tenantId: decoded.tenantId,
-      role: decoded.role,
-    };
+    if (!tenant) {
+      return res.status(404).json({ message: "Tenant not found" });
+    }
 
+    req.tenant = tenant;
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Invalid token" });
+    console.error(error);
+    res.status(500).json({ message: "Tenant middleware error" });
   }
 };

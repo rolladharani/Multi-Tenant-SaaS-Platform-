@@ -180,3 +180,35 @@ exports.updateTask = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+exports.deleteTask = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+
+    const task = await Task.findOne({
+      where: {
+        id: taskId,
+        tenant_id: req.tenant.id,
+      },
+    });
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    await task.destroy();
+
+    res.status(200).json({
+      success: true,
+      message: "Task deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

@@ -1,22 +1,67 @@
-﻿# Multi-Tenancy Strategy
+﻿# Tenancy Strategy – Multi-Tenant SaaS Platform
 
-## Tenancy Model
-This application uses a shared database and shared schema multi-tenancy model.
+## Overview
+This document explains the multi-tenancy strategy used in the Multi-Tenant SaaS Platform and how tenant data isolation is enforced across the system.
 
-## Tenant Isolation
-- Each tenant is identified by a unique tenant_id.
-- All tenant-specific tables include tenant_id as a foreign key.
-- No data is shared across tenants.
+---
 
-## Authentication & Context
-- JWT tokens include user_id, tenant_id, and role.
-- Tenant context is extracted from JWT on every request.
+## Chosen Multi-Tenancy Model
+The application uses the following approach:
+
+**Shared Database + Shared Schema with tenant_id**
+
+All tenants share the same database and schema, but every tenant-scoped record contains a `tenant_id` column.
+
+---
+
+## Reasons for Choosing This Approach
+- Easier to scale and maintain
+- Lower infrastructure cost
+- Simple onboarding of new tenants
+- Works well with ORM-based applications
+- Commonly used in production SaaS platforms
+
+---
+
+## Tenant Identification
+- Each tenant has a unique `subdomain`
+- During login, the tenant is identified using the subdomain
+- The authenticated JWT token contains the `tenant_id`
+
+---
+
+## Data Isolation Enforcement
+- All database queries are automatically filtered using `tenant_id`
+- The `tenant_id` is extracted from the JWT token
+- Client-provided tenant IDs are never trusted
+- Super admin users have `tenant_id = NULL`
+
+This ensures that users cannot access data belonging to other tenants.
+
+---
 
 ## Authorization Rules
-- Super Admin can manage all tenants.
-- Tenant Admin can manage users, projects, and tasks within their tenant only.
-- Regular users can access resources assigned to them within their tenant.
+- **Super Admin**
+  - Can access all tenants
+  - Not associated with any tenant
 
-## Security Enforcement
-- Middleware validates tenant ownership for every request.
-- Cross-tenant data access is strictly blocked.
+- **Tenant Admin**
+  - Full access within their tenant
+  - Cannot access other tenants
+
+- **User**
+  - Limited access within their tenant
+
+---
+
+## Security Considerations
+- JWT-based authentication
+- Role-Based Access Control (RBAC)
+- Passwords hashed using bcrypt
+- API authorization enforced at middleware level
+- Cross-tenant access attempts return `403 Forbidden`
+
+---
+
+## Conclusion
+This tenancy strategy ensures strong data isolation, security, and scalability while keeping the system simple and evaluation-friendly.

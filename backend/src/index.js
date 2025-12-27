@@ -3,24 +3,22 @@ const express = require("express");
 const cors = require("cors");
 
 const { sequelize } = require("./models");
+const seed = require("../seeds/seed");
 
 const app = express();
 
-// Middlewares
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-const authRoutes = require("./routes/auth.routes");
-app.use("/api/auth", authRoutes);
+// Routes
+app.use("/api/auth", require("./routes/auth.routes"));
+app.use("/api/tenants", require("./routes/tenant.routes"));
+app.use("/api", require("./routes/user.routes"));
+app.use("/api/projects", require("./routes/project.routes"));
+app.use("/api", require("./routes/task.routes"));
 
-const tenantRoutes = require("./routes/tenant.routes");
-app.use("/api/tenants", tenantRoutes);
-
-const userRoutes = require("./routes/user.routes");
-app.use("/api/users", userRoutes);
-
-
-// Health check (NO force here)
+// Health check (MANDATORY)
 app.get("/api/health", async (req, res) => {
   try {
     await sequelize.authenticate();
@@ -28,7 +26,7 @@ app.get("/api/health", async (req, res) => {
       status: "ok",
       database: "connected",
     });
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({
       status: "error",
       database: "disconnected",
@@ -38,14 +36,24 @@ app.get("/api/health", async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, async () => {
-  console.log(`Server running on port ${PORT}`);
-
+(async () => {
   try {
-    // 🔥 TEMPORARY force sync ONLY HERE
-    await sequelize.sync();
-    console.log("Models synced with database");
-  } catch (error) {
-    console.error("Startup error:", error.message);
+    console.log("⏳ Connecting DB...");
+    await sequelize.authenticate();
+
+    console.log("🧱 Creating tables...");
+    await sequelize.sync();   // 🔥 THIS WAS MISSING
+
+    console.log("🌱 Running seeds...");
+    await seed();
+
+    console.log("✅ DB ready & seeded");
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Backend running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error("❌ Startup error:", err);
+    process.exit(1);
   }
-});
+})();

@@ -1,8 +1,10 @@
 const { Tenant, User } = require("../models");
-const { hashPassword, comparePassword } = require("../utils/password");
-const { generateToken } = require("../utils/jwt");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
-// Register Tenant + Admin
+// ===============================
+// REGISTER TENANT + ADMIN
+// ===============================
 exports.registerTenant = async (req, res) => {
   try {
     const { tenantName, adminName, email, password } = req.body;
@@ -13,8 +15,8 @@ exports.registerTenant = async (req, res) => {
       status: "active",
     });
 
-    // Hash password
-    const passwordHash = await hashPassword(password);
+    // Hash password (bcryptjs)
+    const passwordHash = await bcrypt.hash(password, 10);
 
     // Create tenant admin
     const user = await User.create({
@@ -25,41 +27,92 @@ exports.registerTenant = async (req, res) => {
       role: "tenant_admin",
     });
 
-    return res.status(201).json({
+    res.status(201).json({
+      success: true,
       message: "Tenant registered successfully",
       tenantId: tenant.id,
       adminId: user.id,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("REGISTER ERROR:", error);
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Login
+// ===============================
+// LOGIN
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    console.log("LOGIN BODY:", req.body);
 
-    const user = await User.findOne({ where: { email } });
+    const { email, password, tenantSubdomain } = req.body;
+
+    // 1️⃣ Find tenant
+    const tenant = await Tenant.findOne({ where: { subdomain: tenantSubdomain } });
+    console.log("TENANT FOUND:", tenant?.id, tenant?.subdomain);
+
+    if (!tenant) {
+      return res.status(404).json({ message: "Tenant not found" });
+    }
+
+    // 2️⃣ Find user inside tenant
+    const user = await User.findOne({
+      where: {
+        email,
+        tenant_id: tenant.id
+      }
+    });
+
+    console.log("USER FOUND:", user?.email, user?.tenant_id);
+
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const isValid = await comparePassword(password, user.password_hash);
-    if (!isValid) {
+    // 3️⃣ Compare password
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+    console.log("PASSWORD MATCH:", isMatch);
+
+    if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = generateToken({
-      userId: user.id,
-      tenantId: user.tenant_id,
-      role: user.role,
-    });
+    // 4️⃣ Create token
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        tenantId: user.tenant_id,
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
+    );
 
     return res.json({
-      token,
+      success: true,
+      token
     });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
+    res.status(500).json({ message: "Server error" });
   }
+};
+// ===============================
+// GET CURRENT USER
+// ===============================
+exports.getMe = async (req, res) => {
+  res.status(200).json({
+    success: true,
+    user: req.user,
+  });
+};
+
+// ===============================
+// LOGOUT (JWT → client deletes token)
+// ===============================
+exports.logout = async (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
 };

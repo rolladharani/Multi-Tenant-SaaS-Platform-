@@ -30,4 +30,10 @@ router.put(
   tenant,
   taskController.updateTask
 );
+router.delete(
+  "/tasks/:taskId",
+  auth,
+  tenant,
+  taskController.deleteTask
+);
 module.exports = router;

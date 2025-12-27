@@ -33,4 +33,5 @@ module.exports = {
   User,
   Project,
   Task,
+  AuditLog,
 };

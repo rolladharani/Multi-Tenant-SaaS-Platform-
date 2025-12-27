@@ -1,8 +1,7 @@
-const { Project } = require("../models");
+const { Project, AuditLog } = require("../models");
 
 /**
  * CREATE PROJECT
- * POST /api/projects
  */
 exports.createProject = async (req, res) => {
   try {
@@ -15,13 +14,22 @@ exports.createProject = async (req, res) => {
       created_by: req.user.userId,
     });
 
-    res.status(201).json({
+    // ✅ AUDIT LOG
+    await AuditLog.create({
+      tenant_id: req.tenant.id,
+      user_id: req.user.userId,
+      action: "CREATE_PROJECT",
+      entity_type: "Project",
+      entity_id: project.id,
+    });
+
+    return res.status(201).json({
       success: true,
       data: project,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -30,7 +38,6 @@ exports.createProject = async (req, res) => {
 
 /**
  * LIST PROJECTS
- * GET /api/projects
  */
 exports.getProjects = async (req, res) => {
   try {
@@ -39,13 +46,13 @@ exports.getProjects = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: projects,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -54,69 +61,62 @@ exports.getProjects = async (req, res) => {
 
 /**
  * UPDATE PROJECT
- * PUT /api/projects/:projectId
  */
 exports.updateProject = async (req, res) => {
   try {
     const { projectId } = req.params;
     const { name, description, status } = req.body;
 
-    // 1️⃣ Find project by ID + tenant isolation
     const project = await Project.findOne({
-      where: {
-        id: projectId,
-        tenant_id: req.tenant.id,
-      },
+      where: { id: projectId, tenant_id: req.tenant.id },
     });
 
     if (!project) {
-      return res.status(404).json({
-        success: false,
-        message: "Project not found",
-      });
+      return res.status(404).json({ success: false, message: "Project not found" });
     }
 
-    // 2️⃣ Authorization:
-    // tenant_admin OR project creator
     if (
       req.user.role !== "tenant_admin" &&
       project.created_by !== req.user.userId
     ) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized to update this project",
-      });
+      return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
-    // 3️⃣ Update only provided fields
     if (name !== undefined) project.name = name;
     if (description !== undefined) project.description = description;
     if (status !== undefined) project.status = status;
 
     await project.save();
 
-    res.status(200).json({
+    // ✅ AUDIT LOG
+    await AuditLog.create({
+      tenant_id: req.tenant.id,
+      user_id: req.user.userId,
+      action: "UPDATE_PROJECT",
+      entity_type: "Project",
+      entity_id: project.id,
+    });
+
+    return res.status(200).json({
       success: true,
       message: "Project updated successfully",
       data: project,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+/**
+ * DELETE PROJECT
+ */
 exports.deleteProject = async (req, res) => {
   try {
     const { projectId } = req.params;
 
     const project = await Project.findOne({
-      where: {
-        id: projectId,
-        tenant_id: req.tenant.id,
-      },
+      where: { id: projectId, tenant_id: req.tenant.id },
     });
 
     if (!project) {
@@ -125,13 +125,21 @@ exports.deleteProject = async (req, res) => {
 
     await project.destroy();
 
-    res.status(200).json({
+    // ✅ AUDIT LOG
+    await AuditLog.create({
+      tenant_id: req.tenant.id,
+      user_id: req.user.userId,
+      action: "DELETE_PROJECT",
+      entity_type: "Project",
+      entity_id: projectId,
+    });
+
+    return res.status(200).json({
       success: true,
       message: "Project deleted successfully",
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
-
